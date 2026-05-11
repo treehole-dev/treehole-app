@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>树洞</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1a1a1a">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #1a1a1a; color: #e0e0e0; min-height: 100vh; }
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; background: #222; padding: 12px 0; border-top: 1px solid #333; z-index: 100; }
+    .nav button { background: none; border: none; color: #999; font-size: 14px; padding: 8px 20px; cursor: pointer; transition: color 0.2s; }
+    .nav button.active { color: #fff; }
+    .page { display: none; padding: 20px; padding-bottom: 80px; }
+    .page.active { display: block; }
+    .treehole-item { background: #222; padding: 16px; margin-bottom: 12px; border-radius: 8px; }
+    .treehole-content { line-height: 1.6; font-size: 15px; color: #e0e0e0; white-space: pre-wrap; word-break: break-all; }
+    .treehole-time { font-size: 12px; color: #666; margin-top: 8px; }
+    .input-area { position: fixed; top: 0; left: 0; right: 0; background: #1a1a1a; padding: 16px; border-bottom: 1px solid #333; z-index: 99; }
+    .input-area textarea { width: 100%; height: 100px; background: #222; border: 1px solid #333; border-radius: 8px; padding: 12px; color: #fff; font-size: 15px; resize: none; }
+    .input-area textarea:focus { outline: none; border-color: #444; }
+    .input-area button { width: 100%; margin-top: 12px; padding: 12px; background: #444; border: none; border-radius: 8px; color: #fff; font-size: 15px; cursor: pointer; }
+    .input-area button:hover { background: #555; }
+    .input-area button:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .diary-list { margin-top: 16px; }
+    .diary-item { background: #222; padding: 16px; margin-bottom: 12px; border-radius: 8px; }
+    .diary-content { line-height: 1.6; font-size: 15px; color: #e0e0e0; white-space: pre-wrap; word-break: break-all; }
+    .diary-time { font-size: 12px; color: #666; margin-top: 8px; }
+    .empty { text-align: center; color: #666; padding: 40px 20px; }
+    .char-count { text-align: right; font-size: 12px; color: #666; margin-top: 4px; }
+    .header { padding: 20px 20px 10px; font-size: 20px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div id="home" class="page active">
+    <div class="header">树洞</div>
+    <div id="treehole-list"></div>
+    <div class="empty" id="empty-home" style="display: none;">还没有任何树洞</div>
+  </div>
+
+  <div id="submit" class="page">
+    <div class="input-area">
+      <textarea id="content-input" placeholder="写下你想说的..." maxlength="500"></textarea>
+      <div class="char-count" id="char-count">0/500</div>
+      <button id="submit-btn">发布</button>
+    </div>
+    <div style="height: 140px;"></div>
+  </div>
+
+  <div id="diary" class="page">
+    <div class="header">私密日记</div>
+    <div class="input-area">
+      <textarea id="diary-input" placeholder="写下你的私密心情..."></textarea>
+      <button id="save-diary-btn">保存</button>
+    </div>
+    <div style="height: 140px;"></div>
+    <div id="diary-list" class="diary-list"></div>
+    <div class="empty" id="empty-diary" style="display: none;">还没有任何日记</div>
+  </div>
+
+  <div class="nav">
+    <button id="nav-home" class="active">树洞</button>
+    <button id="nav-submit">发表</button>
+    <button id="nav-diary">日记</button>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+
+    function switchPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      document.getElementById('nav-' + pageId).classList.add('active');
+      if (pageId === 'home') loadTreeholes();
+      if (pageId === 'diary') loadDiary();
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now - date;
+      if (diff < 60000) return '刚刚';
+      if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+      if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+      return date.toLocaleDateString('zh-CN');
+    }
+
+    async function loadTreeholes() {
+      try {
+        const res = await fetch(`${API_BASE}/list`);
+        const data = await res.json();
+        const list = document.getElementById('treehole-list');
+        const empty = document.getElementById('empty-home');
+        if (data.success && data.data.length > 0) {
+          list.innerHTML = data.data.map(item => `
+            <div class="treehole-item">
+              <div class="treehole-content">${escapeHtml(item.content)}</div>
+              <div class="treehole-time">${formatTime(item.created_at)}</div>
+            </div>
+          `).join('');
+          empty.style.display = 'none';
+          list.style.display = 'block';
+        } else {
+          list.style.display = 'none';
+          empty.style.display = 'block';
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    document.getElementById('content-input').addEventListener('input', () => {
+      const len = document.getElementById('content-input').value.length;
+      document.getElementById('char-count').textContent = len + '/500';
+    });
+
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      const content = document.getElementById('content-input').value.trim();
+      if (!content) return;
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = '发布中...';
+      try {
+        const res = await fetch(`${API_BASE}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('content-input').value = '';
+          document.getElementById('char-count').textContent = '0/500';
+          switchPage('home');
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '发布';
+      }
+    });
+
+    function encrypt(text) {
+      let result = '';
+      for (let i = 0; i < text.length; i++) {
+        result += String.fromCharCode(text.charCodeAt(i) + 1);
+      }
+      return btoa(result);
+    }
+
+    function decrypt(text) {
+      try {
+        const decoded = atob(text);
+        let result = '';
+        for (let i = 0; i < decoded.length; i++) {
+          result += String.fromCharCode(decoded.charCodeAt(i) - 1);
+        }
+        return result;
+      } catch {
+        return '';
+      }
+    }
+
+    function saveDiary() {
+      const content = document.getElementById('diary-input').value.trim();
+      if (!content) return;
+      const diary = {
+        content: content,
+        created_at: Date.now()
+      };
+      const existing = localStorage.getItem('diary');
+      const list = existing ? JSON.parse(decrypt(existing)) : [];
+      list.unshift(diary);
+      localStorage.setItem('diary', encrypt(JSON.stringify(list)));
+      document.getElementById('diary-input').value = '';
+      loadDiary();
+    }
+
+    function loadDiary() {
+      const existing = localStorage.getItem('diary');
+      const list = document.getElementById('diary-list');
+      const empty = document.getElementById('empty-diary');
+      if (existing) {
+        try {
+          const diaries = JSON.parse(decrypt(existing));
+          if (diaries.length > 0) {
+            list.innerHTML = diaries.map(d => `
+              <div class="diary-item">
+                <div class="diary-content">${escapeHtml(d.content)}</div>
+                <div class="diary-time">${formatTime(d.created_at)}</div>
+              </div>
+            `).join('');
+            empty.style.display = 'none';
+            list.style.display = 'block';
+          } else {
+            list.style.display = 'none';
+            empty.style.display = 'block';
+          }
+        } catch {
+          list.style.display = 'none';
+          empty.style.display = 'block';
+        }
+      } else {
+        list.style.display = 'none';
+        empty.style.display = 'block';
+      }
+    }
+
+    document.getElementById('save-diary-btn').addEventListener('click', saveDiary);
+    document.getElementById('nav-home').addEventListener('click', () => switchPage('home'));
+    document.getElementById('nav-submit').addEventListener('click', () => switchPage('submit'));
+    document.getElementById('nav-diary').addEventListener('click', () => switchPage('diary'));
+
+    loadTreeholes();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>

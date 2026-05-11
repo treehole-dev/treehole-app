@@ -1,0 +1,1 @@
+﻿<template><view class="splash"><text>匿名角落</text></view></template><script setup lang="ts">import{onMounted}from"vue";onMounted(()=>{setTimeout(()=>{location.href="/pages/diary/list"},2000)})</script><style>.splash{display:flex;justify-content:center;align-items:center;height:100vh;background:#f5f7fa;}</style>

@@ -1,0 +1,94 @@
+{
+  "pages": [
+    {
+      "path": "pages/splash/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "启动页"
+      }
+    },
+    {
+      "path": "pages/unlock/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "解锁"
+      }
+    },
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/diary/list",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "私密日记",
+        "navigationBarBackgroundColor": "#f5f7fa",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/diary/new",
+      "style": {
+        "navigationBarTitleText": "写日记",
+        "navigationBarBackgroundColor": "#f5f7fa",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/treehole/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "公开树洞",
+        "navigationBarBackgroundColor": "#f5f7fa",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/treehole/publish",
+      "style": {
+        "navigationBarTitleText": "发布树洞",
+        "navigationBarBackgroundColor": "#f5f7fa",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/chat/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "AI聊天",
+        "navigationBarBackgroundColor": "#f5f7fa",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/stats/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "情绪统计",
+        "navigationBarBackgroundColor": "#f5f7fa",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#f5f7fa",
+        "navigationBarTextStyle": "black"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "匿名角落",
+    "navigationBarBackgroundColor": "#f5f7fa",
+    "backgroundColor": "#f5f7fa",
+    "backgroundColorTop": "#f5f7fa",
+    "backgroundColorBottom": "#f5f7fa"
+  }
+}

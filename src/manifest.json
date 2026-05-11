@@ -1,0 +1,26 @@
+{
+  "name": "匿名角落",
+  "appid": "__UNI__ANONYMOUS",
+  "description": "回避型人格匿名角落APP",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "h5": {
+    "title": "匿名角落",
+    "router": {
+      "mode": "hash",
+      "base": "./"
+    },
+    "devServer": {
+      "port": 5173,
+      "open": true
+    }
+  },
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false
+    },
+    "usingComponents": true
+  }
+}
