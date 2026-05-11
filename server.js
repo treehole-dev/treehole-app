@@ -6,11 +6,16 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const db = new sqlite3.Database('./treeholes.db', (err) => {
+// 使用 Vercel 临时目录或当前目录
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/tmp/treeholes.db' 
+  : './treeholes.db';
+
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error(err.message);
   }
-  console.log('Connected to the SQLite database.');
+  console.log('Connected to the SQLite database at:', dbPath);
 });
 
 db.run(`CREATE TABLE IF NOT EXISTS treeholes (
